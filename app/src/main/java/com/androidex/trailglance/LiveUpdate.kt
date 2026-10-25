@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Bundle
 
 /**
  * Re-posts Trailforks' ride stats as an Android 16+ "Live Update" (a promoted ongoing
@@ -16,6 +17,7 @@ import android.os.Build
 object LiveUpdate {
     private const val CHANNEL_ID = "ride"
     private const val NOTIFICATION_ID = 1
+    private const val EXTRA_REQUEST_PROMOTED_ONGOING = "android.requestPromotedOngoing"
 
     private fun manager(context: Context) = context.getSystemService(NotificationManager::class.java)
 
@@ -62,7 +64,8 @@ object LiveUpdate {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-            builder.setRequestPromotedOngoing(true)
+            // Same as Notification.Builder.setRequestPromotedOngoing(), which the API 36 SDK doesn't expose.
+            builder.addExtras(Bundle().apply { putBoolean(EXTRA_REQUEST_PROMOTED_ONGOING, true) })
             stats.distance?.let { builder.setShortCriticalText(it.replace(" ", "")) }
         }
 
