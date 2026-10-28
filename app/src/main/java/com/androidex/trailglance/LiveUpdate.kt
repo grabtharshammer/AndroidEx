@@ -33,13 +33,15 @@ object LiveUpdate {
         manager(context).createNotificationChannel(channel)
     }
 
-    fun post(context: Context, stats: RideStats, sourcePackage: String?) {
+    fun post(context: Context, stats: RideStats, recentMetersPerSecond: Double?, sourcePackage: String?) {
         ensureChannel(context)
         val now = System.currentTimeMillis()
         val builder = Notification.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_bike)
             .setContentTitle(stats.distance ?: "Recording")
-            .setContentText(if (stats.paused) "Paused · ${stats.raw}" else stats.raw)
+            .setContentText(
+                SpeedTracker.speedLine(stats, recentMetersPerSecond).let { if (stats.paused) "Paused · $it" else it }
+            )
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setShowWhen(true)

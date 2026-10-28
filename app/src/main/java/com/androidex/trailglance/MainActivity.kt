@@ -60,7 +60,7 @@ class MainActivity : Activity() {
             })
         }
         column.addView(button("Test: show a fake ride") {
-            LiveUpdate.post(this, TrailforksParser.parse("Recording 5:10 - 75ft"), null)
+            LiveUpdate.post(this, TrailforksParser.parse("Recording 25:10 - 3.2mi"), 4.5, null)
             status.postDelayed(::refresh, 500)
         })
         column.addView(button("Clear") {
@@ -132,6 +132,7 @@ class MainActivity : Activity() {
                 appendLine("  ongoing: ${p.getBoolean(DebugState.KEY_ONGOING, false)}")
                 appendLine("  parsed time: ${stats.elapsedSeconds?.let { DateUtils.formatElapsedTime(it) } ?: "—"}")
                 appendLine("  parsed distance: ${stats.distance ?: "—"}")
+                appendLine("  ${SpeedTracker.speedLine(stats, null)}")
                 append("  mirroring: ${p.getBoolean(DebugState.KEY_MIRRORING, false)}")
             }
         }

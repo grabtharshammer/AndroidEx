@@ -7,6 +7,8 @@ import android.service.notification.StatusBarNotification
 /** Watches for Trailforks' ongoing recording notification and mirrors it as a Live Update. */
 class TrailforksListener : NotificationListenerService() {
 
+    private val speed = SpeedTracker()
+
     override fun onListenerConnected() {
         val active = activeNotifications?.filter(::isTrailforks).orEmpty()
         if (active.none { it.isOngoing }) stopMirroring()
@@ -29,11 +31,14 @@ class TrailforksListener : NotificationListenerService() {
         val stats = TrailforksParser.parse(text)
         val mirror = sbn.isOngoing && stats.hasData
         DebugState.record(this, sbn.packageName, sbn.isOngoing, text, mirror)
-        if (mirror) LiveUpdate.post(this, stats, sbn.packageName)
+        if (!mirror) return
+        if (stats.elapsedSeconds != null && stats.distanceMeters != null) speed.add(stats.elapsedSeconds, stats.distanceMeters)
+        LiveUpdate.post(this, stats, speed.recentSpeed(), sbn.packageName)
     }
 
     private fun stopMirroring() {
         LiveUpdate.cancel(this)
+        speed.reset()
         DebugState.setMirroring(this, false)
     }
 
